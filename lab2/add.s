@@ -12,10 +12,6 @@ liczba2:
         .long 0xF040500C, 0x00220026, 0x321000CB, 0x04520031
 len_l2= ((. - liczba2)/4)-1
 
-#liczba2:
-#        .long 0xA040500C, 0x00220026, 0x321000CB, 0x04520031   
-#len_l2= ((. - liczba2)/4)-1
-
 .global _start
 _start:
 
@@ -78,7 +74,7 @@ _start:
         adcl %eax, %edx
         jc carry
         movl $0, %eax                   #jezeli nie ma przeniesienia
-        push %eax                       #to wpisujemy zero "na poczatku liczby"
+        push %eax                       #to wpisujemy 0 "na poczatku liczby"
         jmp quit
 
         carry:

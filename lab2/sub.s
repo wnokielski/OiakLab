@@ -12,10 +12,6 @@ liczba2:
         .long 0xF040500C, 0x00220026, 0x321000CB, 0x04520031
 len_l2= ((. - liczba2)/4)-1
 
-#liczba2:
-#        .long 0xA040500C, 0x00220026, 0x321000CB, 0x04520031   
-#len_l2= ((. - liczba2)/4)-1
-
 .global _start
 _start:
 
@@ -26,15 +22,15 @@ _start:
         xor %esi, %esi
         xor %edi, %edi
 
-        clc                         #wyzerowanie flagi przeniesienia
-
         movl $len_l1, %esi          #zapisanie ilosci longow w liczbie 
         movl $len_l2, %edi          #do rejestrow esi i edi
 
-        adding:
+        clc                         #wyzerowanie flagi pozyczki
+
+        subtracting:
         movl liczba1(,%esi,4), %eax
         movl liczba2(,%edi,4), %edx
-        adcl %eax, %edx
+        sbbl %eax, %edx
         push %edx
         cmp $0, %esi
         je endOfEqualLengthPart
@@ -42,9 +38,9 @@ _start:
         je endOfEqualLengthPart
         dec %esi
         dec %edi
-        jmp adding
+        jmp subtracting
 
-        endOfEqualLengthPart:        #przechodzimy tutaj, gdy dodalismy juz cyfry
+        endOfEqualLengthPart:        #przechodzimy tutaj, gdy odjelismy juz cyfry
                                         #na liczbie pozycji rownej ilosci cyfr
                                        #w krotszej liczbie
         cmp %esi, %edi               
@@ -56,8 +52,8 @@ _start:
         xor %edx, %edx
         dec %esi
         movl liczba1(,%esi,4), %eax
-        adcl %eax, %edx
-        push %edx
+        sbbl %edx, %eax
+        push %eax
         cmp $0, %esi
         je quit
         jmp firstNumberGreater
@@ -66,8 +62,8 @@ _start:
         dec %edi
         xor %edx, %edx
         movl liczba2(,%edi,4), %eax
-        adcl %eax, %edx
-        push %edx
+        sbbl %edx, %eax
+        push %eax
         cmp $0, %edi   
         je quit
         jmp secondNumberGreater
@@ -75,14 +71,14 @@ _start:
         end:
         movl liczba1(,%esi,4), %eax
         movl liczba2(,%edi,4), %edx
-        adcl %eax, %edx
-        jc carry
-        movl $0, %eax                   #jezeli nie ma przeniesienia
+        sbbl %eax, %edx
+        jc borrow
+        movl $0, %eax                   #jezeli nie ma pozyczki
         push %eax                       #to wpisujemy zero "na poczatku liczby"
         jmp quit
 
-        carry:
-        movl $1, %eax                   #jezeli jest przeniesienie
+        borrow:
+        movl $1, %eax                   #jezeli jest pozyczka
         push %eax                       #to wpisujemy 1 "na poczatku liczby"
 
 quit:
