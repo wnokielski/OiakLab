@@ -13,4 +13,4 @@ writeText.o: writeText.s
 compareText: compareText.o
 	ld -o compareText compareText.o
 compareText.o: compareText.s
-	as -o compareText.o compareText.s
+	as -o compareText.o compareText.s -g

@@ -1,0 +1,8 @@
+#untrack .o files
+*.o
+
+#untrack all files without extension
+!*.*
+
+#track makefile
+!makefile
