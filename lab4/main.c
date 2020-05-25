@@ -7,7 +7,7 @@ typedef struct vector{
     float a,b,c,d;
 } vector;
 
-#define NUMBERS 2048
+#define NUMBERS 8192
 
 vector vec1[NUMBERS/4];    //vectors for SIMD instructions
 vector vec2[NUMBERS/4];
@@ -50,7 +50,7 @@ void SIMDAdd(vector *A, vector *B){
         "addps %%xmm0, %%xmm1\n"
         :
         :"r"(A), "r"(B)
-        :"ecx", "edx"
+        :
     );
 }
 
@@ -61,7 +61,7 @@ void SIMDMul(vector *A, vector *B){
         "mulps %%xmm0, %%xmm1\n"
         :
         :"r"(A), "r"(B)
-        :"ecx", "edx"
+        :
     );
 }
 
@@ -72,7 +72,7 @@ void SIMDSub(vector *A, vector *B){
         "subps %%xmm0, %%xmm1\n"
         :
         :"r"(A), "r"(B)
-        :"ecx", "edx"
+        :
     );
 }
 
@@ -83,7 +83,7 @@ void SIMDDiv(vector *A, vector *B){
         "divps %%xmm1, %%xmm0\n"
         :
         :"r"(A), "r"(B)
-        :"ecx", "edx"
+        :
     );
 }
 
@@ -94,7 +94,7 @@ void SISDAdd(float *A, float *B){
         "add %%eax, %%ebx\n"
         :
         :"r"(A), "r"(B)
-        :"ecx", "edx", "eax", "ebx"
+        :"eax", "ebx"
     );
 }
 
@@ -105,7 +105,7 @@ void SISDMul(float *A, float *B){
         "mul %%ebx\n"
         :
         :"r"(A), "r"(B)
-        :"ecx", "edx", "eax", "ebx"
+        :"eax", "ebx"
     );
 }
 
@@ -116,7 +116,7 @@ void SISDSub(float *A, float *B){
         "sub %%eax, %%ebx\n"
         :
         :"r"(A), "r"(B)
-        :"ecx", "edx", "eax", "ebx"
+        :"eax", "ebx"
     );
 }
 
@@ -128,7 +128,7 @@ void SISDDiv(float *A, float *B){
         "div %%ecx\n"
         :
         :"r"(A), "r"(B)
-        :"ecx", "edx", "eax", "ebx"
+        :"ecx", "edx", "eax"
     );
 }
 
