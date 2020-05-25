@@ -7,7 +7,7 @@ typedef struct vector{
     long a,b,c,d;
 } vector;
 
-#define NUMBERS 2048
+#define NUMBERS 8192
 
 vector vec1[NUMBERS/4];    //vectors for SIMD instructions
 vector vec2[NUMBERS/4];
@@ -128,11 +128,12 @@ void SISDSub(long *A, long *B){
 }
 
 void SISDDiv(long *A, long *B){
-    __asm__("movl %0, %%ecx\n"
+    __asm__("movl %0, %%ebx\n"
         "movl %1, %%edx\n"
-        "movl (%%ecx), %%eax\n"
-        "movl (%%edx), %%ebx\n"
-        "idiv %%ebx\n"
+        "movl (%%ebx), %%eax\n"
+        "movl (%%edx), %%ecx\n"
+        "movl $0, %%edx\n"
+        "div %%ecx\n"
         :
         :"r"(A), "r"(B)
         :"ecx", "edx", "eax", "ebx"
@@ -293,7 +294,7 @@ int main(){
         t = clock();   //start time measure
 
         for(int j=0; j<NUMBERS; j++){
-     //       SISDDiv(&num1[j], &num2[j]);
+            SISDDiv(&num1[j], &num2[j]);
         }
 
         t = clock() - t;    //stop time measure
