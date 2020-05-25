@@ -4,16 +4,16 @@
 #include <limits.h>
 
 typedef struct vector{
-    long a,b,c,d;
+    float a,b,c,d;
 } vector;
 
-#define NUMBERS 8192
+#define NUMBERS 2048
 
 vector vec1[NUMBERS/4];    //vectors for SIMD instructions
 vector vec2[NUMBERS/4];
 
-long num1[NUMBERS];  //tabs with numbers for SISD instructions
-long num2[NUMBERS];
+float num1[NUMBERS];  //tabs with numbers for SISD instructions
+float num2[NUMBERS];
 
 double t; //auxiliary variable for time measure
 double tSum = 0;
@@ -37,17 +37,16 @@ void fillVector(vector x[]){
     }
 }
 
-void fillTab(long x[]){
+void fillTab(float x[]){
     for(int i=0; i<NUMBERS; i++){
         x[i] = randomNumber();
     }
 }
 
 void SIMDAdd(vector *A, vector *B){
-    __asm__("movl %0, %%ecx\n"
-        "movl %1, %%edx\n"
-        "movups (%%ecx), %%xmm0\n"
-        "movups (%%edx), %%xmm1\n"
+    __asm__(
+        "movups (%0), %%xmm0\n"
+        "movups (%1), %%xmm1\n"
         "addps %%xmm0, %%xmm1\n"
         :
         :"r"(A), "r"(B)
@@ -56,10 +55,9 @@ void SIMDAdd(vector *A, vector *B){
 }
 
 void SIMDMul(vector *A, vector *B){
-    __asm__("movl %0, %%ecx\n"
-        "movl %1, %%edx\n"
-        "movups (%%ecx), %%xmm0\n"
-        "movups (%%edx), %%xmm1\n"
+    __asm__(
+        "movups (%0), %%xmm0\n"
+        "movups (%1), %%xmm1\n"
         "mulps %%xmm0, %%xmm1\n"
         :
         :"r"(A), "r"(B)
@@ -68,10 +66,9 @@ void SIMDMul(vector *A, vector *B){
 }
 
 void SIMDSub(vector *A, vector *B){
-    __asm__("movl %0, %%ecx\n"
-        "movl %1, %%edx\n"
-        "movups (%%ecx), %%xmm0\n"
-        "movups (%%edx), %%xmm1\n"
+    __asm__(
+        "movups (%0), %%xmm0\n"
+        "movups (%1), %%xmm1\n"
         "subps %%xmm0, %%xmm1\n"
         :
         :"r"(A), "r"(B)
@@ -80,22 +77,20 @@ void SIMDSub(vector *A, vector *B){
 }
 
 void SIMDDiv(vector *A, vector *B){
-    __asm__("movl %0, %%ecx\n"
-        "movl %1, %%edx\n"
-        "movups (%%ecx), %%xmm0\n"
-        "movups (%%edx), %%xmm1\n"
-        "divps %%xmm0, %%xmm1\n"
+    __asm__(
+        "movups (%0), %%xmm0\n"
+        "movups (%1), %%xmm1\n"
+        "divps %%xmm1, %%xmm0\n"
         :
         :"r"(A), "r"(B)
         :"ecx", "edx"
     );
 }
 
-void SISDAdd(long *A, long *B){
-    __asm__("movl %0, %%ecx\n"
-        "movl %1, %%edx\n"
-        "movl (%%ecx), %%eax\n"
-        "movl (%%edx), %%ebx\n"
+void SISDAdd(float *A, float *B){
+    __asm__(
+        "movl (%0), %%eax\n"
+        "movl (%1), %%ebx\n"
         "add %%eax, %%ebx\n"
         :
         :"r"(A), "r"(B)
@@ -103,11 +98,10 @@ void SISDAdd(long *A, long *B){
     );
 }
 
-void SISDMul(long *A, long *B){
-    __asm__("movl %0, %%ecx\n"
-        "movl %1, %%edx\n"
-        "movl (%%ecx), %%eax\n"
-        "movl (%%edx), %%ebx\n"
+void SISDMul(float *A, float *B){
+    __asm__(
+        "movl (%0), %%eax\n"
+        "movl (%1), %%ebx\n"
         "mul %%ebx\n"
         :
         :"r"(A), "r"(B)
@@ -115,11 +109,10 @@ void SISDMul(long *A, long *B){
     );
 }
 
-void SISDSub(long *A, long *B){
-    __asm__("movl %0, %%ecx\n"
-        "movl %1, %%edx\n"
-        "movl (%%ecx), %%eax\n"
-        "movl (%%edx), %%ebx\n"
+void SISDSub(float *A, float *B){
+    __asm__(
+        "movl (%0), %%eax\n"
+        "movl (%1), %%ebx\n"
         "sub %%eax, %%ebx\n"
         :
         :"r"(A), "r"(B)
@@ -127,12 +120,11 @@ void SISDSub(long *A, long *B){
     );
 }
 
-void SISDDiv(long *A, long *B){
-    __asm__("movl %0, %%ebx\n"
-        "movl %1, %%edx\n"
-        "movl (%%ebx), %%eax\n"
-        "movl (%%edx), %%ecx\n"
-        "movl $0, %%edx\n"
+void SISDDiv(float *A, float *B){
+    __asm__(
+        "movl (%0), %%eax\n"
+        "movl (%1), %%ecx\n"
+        "movl $0, %%edx\n"  //zero dividend high byte
         "div %%ecx\n"
         :
         :"r"(A), "r"(B)
